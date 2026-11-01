@@ -20,7 +20,7 @@ const finals = [
   ['iu','Q'],['ei','W'],['e','E'],['uan','R'],['üan','R'],['üe','T'],['un','Y'],['ün','Y'],['u','U'],['i','I'],['uo','O'],['ie','P'],['a','A'],['ong','S'],['iong','S'],['ai','D'],['en','F'],['eng','G'],['ang','H'],['an','J'],['ing','K'],['uai','K'],['iang','L'],['uang','L'],['ou','Z'],['ia','X'],['ua','X'],['ao','C'],['ui','V'],['in','B'],['iao','N'],['ian','M']
 ].map(([sound,key]) => ({ id:`final-${sound}`, category:'finals', prompt:`韵母 ${sound} 对应小鹤键盘上的哪个键？`, answer:key, explanation:`韵母 ${sound} 对应 ${key} 键。一个键可能同时代表多个韵母，按题目中的拼音来记。` }));
 const syllables = [
-  ['ma','妈','MA'],['shi','是','UI'],['zhong','中','VS'],['wen','文','WF'],['shuang','双','UL'],['pin','拼','PB'],['xiao','小','XN'],['fei','飞','FW'],['zui','最','ZV'],['chun','春','IY'],['niang','娘','NL'],['huang','黄','HL'],['guang','光','GL'],['liu','六','LQ'],['dian','点','DJ'],['qiu','秋','QQ'],['xue','学','XT'],['jue','觉','JT'],['yuan','远','YR'],['yue','月','YT'],['jiao','教','JN'],['ren','人','RF'],['guo','国','GO'],['chen','陈','IF'],['zhao','找','VC'],['zhuo','桌','VO'],['chuang','窗','IL'],['xiong','熊','XS'],['ting','听','TK'],['kuai','快','KK'],['ying','英','YK']
+  ['ma','妈','MA'],['shi','是','UI'],['zhong','中','VS'],['wen','文','WF'],['shuang','双','UL'],['pin','拼','PB'],['xiao','小','XN'],['fei','飞','FW'],['zui','最','ZV'],['chun','春','IY'],['niang','娘','NL'],['huang','黄','HL'],['guang','光','GL'],['liu','六','LQ'],['dian','点','DM'],['qiu','秋','QQ'],['xue','学','XT'],['jue','觉','JT'],['yuan','远','YR'],['yue','月','YT'],['jiao','教','JN'],['ren','人','RF'],['guo','国','GO'],['chen','陈','IF'],['zhao','找','VC'],['zhuo','桌','VO'],['chuang','窗','IL'],['xiong','熊','XS'],['ting','听','TK'],['kuai','快','KK'],['ying','英','YK']
 ].map(([pinyin,example,code]) => ({ id:`syllable-${pinyin}`, category:'syllables', prompt:`“${example}”的拼音是 ${pinyin}，输入它的两键小鹤编码。`, answer:code, explanation:`${pinyin} → ${code[0]} + ${code[1]}。第一个键是声母，第二个键是韵母。` }));
 const zeroInitials = [
   ['a','AA'],['ai','AI'],['an','AN'],['ang','AH'],['ao','AO'],['e','EE'],['ei','EI'],['en','EN'],['eng','EG'],['er','ER'],['o','OO'],['ou','OU']
@@ -323,10 +323,22 @@ function renderDiagnosticResult(score,breakdown) {
 function closeExercise() { $('exercise-modal').hidden=true; document.body.style.overflow=''; exercise=null; renderHome(); }
 
 function buildVirtualKeyboard() {
-  $('virtual-keyboard').innerHTML='';
-  'QWERTYUIOPASDFGHJKLZXCVBNM'.split('').forEach(letter=>{
-    const btn=document.createElement('button');btn.type='button';btn.textContent=letter;btn.dataset.letter=letter;
-    btn.addEventListener('click',()=>appendVirtualKey(letter));$('virtual-keyboard').appendChild(btn);
+  const root = $('virtual-keyboard');
+  root.innerHTML = '';
+  // Keep the familiar staggered QWERTY layout instead of a 7-column alphabet grid.
+  const rows = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+  rows.forEach((letters, index) => {
+    const row = document.createElement('div');
+    row.className = `virtual-keyboard-row row-${index + 1}`;
+    [...letters].forEach(letter => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = letter;
+      btn.dataset.letter = letter;
+      btn.addEventListener('click', () => appendVirtualKey(letter));
+      row.appendChild(btn);
+    });
+    root.appendChild(row);
   });
 }
 function appendVirtualKey(letter) {
